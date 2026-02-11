@@ -12,7 +12,7 @@ import {
 import Contact from '../components/Contact';
 import { AppNavigation, Route } from '../navigation/types';
 import { Contact as ContactType } from '../types/contact';
-import { getStoredContacts, saveContacts } from '../storage/contactStorage';
+import { seedContactsOnce } from '../storage/contactStorage';
 
 type HomeScreenProps = {
   navigation: AppNavigation;
@@ -33,14 +33,8 @@ function HomeScreen({ navigation, route }: HomeScreenProps) {
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
-    const storedContacts = await getStoredContacts();
-
-    if (storedContacts.length === 0) {
-      await saveContacts(staticContacts);
-      setContacts(staticContacts);
-    } else {
-      setContacts(storedContacts);
-    }
+    const contactsFromStorage = await seedContactsOnce(staticContacts);
+    setContacts(contactsFromStorage);
 
     setLoading(false);
   }, []);
