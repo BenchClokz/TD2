@@ -105,3 +105,11 @@ npm run android:ready
 ```
 
 This waits for ADB to detect a fully booted emulator (`sys.boot_completed=1`) before launching `react-native run-android`.
+
+## TP Exercises (Ex1 / Ex2 / Ex3)
+
+In this environment, installing external packages from npm registry is blocked (`403 Forbidden`).
+To keep the app runnable, the exercises are implemented with local adapters:
+- `src/lib/paperLike.tsx` for React Native Paper-like UI components.
+- `src/lib/axiosLike.ts` for REST GET/POST calls (using `fetch`).
+- `src/lib/sqliteLike.ts` for SQLite-like local persistence (using in-app storage).
