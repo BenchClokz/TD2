@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { AppNavigation } from '../../navigation/types';
-import { ApiPost, createPost, getPosts } from '../../lib/axiosLike';
+import { ApiPost, ApiUser, createPost, getPosts, getUsers } from '../../lib/axiosLike';
 import { PaperLoader } from '../../lib/paperLike';
 
 type Props = {
@@ -18,25 +18,28 @@ type Props = {
 
 function Exercise2ApiScreen({ navigation }: Props) {
   const [posts, setPosts] = useState<ApiPost[]>([]);
+  const [users, setUsers] = useState<ApiUser[]>([]);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [showUsers, setShowUsers] = useState(false);
 
   useEffect(() => {
-    const loadPosts = async () => {
+    const loadApiData = async () => {
       setLoading(true);
       try {
-        const data = await getPosts();
-        setPosts(data);
+        const [postsData, usersData] = await Promise.all([getPosts(), getUsers()]);
+        setPosts(postsData);
+        setUsers(usersData);
       } catch {
-        setMessage('Erreur lors du chargement des posts.');
+        setMessage('Erreur lors du chargement des donnees API.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadPosts();
+    loadApiData();
   }, []);
 
   const submitPost = async () => {
@@ -63,6 +66,7 @@ function Exercise2ApiScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Ex 2 - REST API</Text>
+        <Text style={styles.subtitle}>Source publique: JSONPlaceholder</Text>
         <PaperLoader visible={loading} />
 
         <TextInput placeholder="Titre" value={title} onChangeText={setTitle} style={styles.input} />
@@ -72,18 +76,38 @@ function Exercise2ApiScreen({ navigation }: Props) {
           <Text style={styles.buttonText}>Ajouter un post (POST)</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => setShowUsers(prev => !prev)}>
+          <Text style={styles.secondaryButtonText}>
+            {showUsers ? 'Voir les posts' : 'Voir les utilisateurs (GET)'}
+          </Text>
+        </TouchableOpacity>
+
         {message ? <Text style={styles.message}>{message}</Text> : null}
 
-        <FlatList
-          data={posts}
-          keyExtractor={item => `${item.id}`}
-          renderItem={({ item }) => (
-            <View style={styles.postCard}>
-              <Text style={styles.postTitle}>{item.title}</Text>
-              <Text style={styles.postBody}>{item.body}</Text>
-            </View>
-          )}
-        />
+        {showUsers ? (
+          <FlatList
+            data={users}
+            keyExtractor={item => `${item.id}`}
+            renderItem={({ item }) => (
+              <View style={styles.postCard}>
+                <Text style={styles.postTitle}>{item.name}</Text>
+                <Text style={styles.postBody}>{item.email}</Text>
+                <Text style={styles.metaText}>{item.company?.name ?? 'Entreprise non renseignee'}</Text>
+              </View>
+            )}
+          />
+        ) : (
+          <FlatList
+            data={posts}
+            keyExtractor={item => `${item.id}`}
+            renderItem={({ item }) => (
+              <View style={styles.postCard}>
+                <Text style={styles.postTitle}>{item.title}</Text>
+                <Text style={styles.postBody}>{item.body}</Text>
+              </View>
+            )}
+          />
+        )}
 
         <TouchableOpacity style={styles.backButton} onPress={navigation.goBack}>
           <Text style={styles.backButtonText}>Retour</Text>
@@ -105,6 +129,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
+    marginBottom: 2,
+  },
+  subtitle: {
+    color: '#475569',
     marginBottom: 10,
   },
   input: {
@@ -124,6 +152,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  secondaryButton: {
+    backgroundColor: '#0f766e',
+    borderRadius: 10,
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
+  secondaryButtonText: {
     color: '#fff',
     fontWeight: '700',
   },
@@ -147,6 +186,11 @@ const styles = StyleSheet.create({
   },
   postBody: {
     color: '#334155',
+  },
+  metaText: {
+    marginTop: 4,
+    color: '#64748b',
+    fontSize: 12,
   },
   backButton: {
     backgroundColor: '#1f2937',
