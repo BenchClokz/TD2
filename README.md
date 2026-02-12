@@ -95,3 +95,21 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+## Android emulator boot race (Windows)
+
+If `npm run android` fails with `InstallException: device is still booting`, use:
+
+```sh
+npm run android:ready
+```
+
+This waits for ADB to detect a fully booted emulator (`sys.boot_completed=1`) before launching `react-native run-android`.
+
+## TP Exercises (Ex1 / Ex2 / Ex3)
+
+In this environment, installing external packages from npm registry is blocked (`403 Forbidden`).
+To keep the app runnable, the exercises are implemented with local adapters:
+- `src/lib/paperLike.tsx` for React Native Paper-like UI components.
+- `src/lib/axiosLike.ts` for REST GET/POST calls (using `fetch`).
+- `src/lib/sqliteLike.ts` for SQLite-like local persistence (using in-app storage).
